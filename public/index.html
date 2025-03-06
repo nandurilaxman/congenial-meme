@@ -1,5 +1,32 @@
-mkdir public
-echo '<h1>Hello from GitHub Pages!</h1>' > public/index.html
-git add public
-git commit -m "Add public folder for deployment"
-git push origin main
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Live Cricket Scoring App</title>
+  <style>
+    body { font-family: Arial; text-align: center; }
+    .score { background-color: #e0ffe0; padding: 20px; margin: 20px; }
+  </style>
+</head>
+<body>
+  <h1>Live Cricket Scoring App</h1>
+  <div id="score" class="score">Loading...</div>
+  <script>
+    async function fetchScore() {
+      const response = await fetch('https://congenial-meme.herokuapp.com/score'); // Update with your Heroku URL
+      const data = await response.json();
+      if (data.error) {
+        document.getElementById('score').innerHTML = data.error;
+      } else {
+        document.getElementById('score').innerHTML = `
+          <h2>${data.match.teams[0]} vs ${data.match.teams[1]}</h2>
+          <p>${data.match.teams[0]}: ${data.match.score[data.match.teams[0]]}/${data.match.wickets[data.match.teams[0]]}</p>
+          <p>${data.match.teams[1]}: ${data.match.score[data.match.teams[1]]}/${data.match.wickets[data.match.teams[1]]}</p>
+          <p>Overs: ${data.match.overs}</p>
+        `;
+      }
+    }
+    fetchScore();
+    setInterval(fetchScore, 30000); // Update every 30 seconds
+  </script>
+</body>
+</html>
