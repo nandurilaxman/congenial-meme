@@ -44,7 +44,7 @@ jobs:
         if: env.SLACK_WEBHOOK_URL != null # Skip if not set
         uses: slackapi/slack-github-action@v1.24.0
         with:
-          slack-message: 'Cricket Scoring App scores updated successfully!' # Use slack-message instead of text
+          slack-message: 'Cricket Scoring App scores updated successfully!' # Use slack-message
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} # Pass as environment variable
       - name: Log Slack Skip
@@ -59,4 +59,8 @@ jobs:
         uses: zaproxy/action-baseline@v0.11.0
         with:
           target: 'https://nandurilaxman.github.io/congenial-meme/'
-          cmd_options: '-q'
+          # Removed -q, keeping default output
+          report_json: report_json.json
+          report_md: report_md.md
+          report_html: report_html.html
+          fail_on_warning: false # Optional: Prevents failure on warnings
