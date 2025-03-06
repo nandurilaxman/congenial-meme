@@ -1,0 +1,72 @@
+# devsecops-pipeline.yml - My complete DevSecOps pipeline with live scores
+name: DevSecOps Pipeline
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cache Node
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - run: npm install
+      - run: npm test
+      - run: echo "Building Cricket Scoring App"
+      - uses: actions/upload-artifact@v3
+        with:
+          name: build-output
+          path: ./public
+      - name: Set API Key as Environment Variable
+        run: echo "CRICAPI_KEY=${{ secrets.CRICAPI_KEY }}" >> $GITHUB_ENV
+      - name: Run App Locally to Verify (Optional)
+        run: node index.js & sleep 5 # Runs briefly to test API call
+        env:
+          CRICAPI_KEY: ${{ secrets.CRICAPI_KEY }}
+
+  security-scans:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    steps:
+      - uses: actions/checkout@v4
+      - name: TruffleHog Scan
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: './'
+          exclude: 'node_modules'
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: security-scans
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t congenial-meme .
+      - run: docker scan congenial-meme
+      - uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
+      - uses: slackapi/slack-github-action@v1.24.0
+        with:
+          slack-bot-token: ${{ secrets.SLACK_WEBHOOK_URL }}
+          text: 'Cricket Scoring App deployed successfully!'
+
+  post-deploy:
+    runs-on: ubuntu-latest
+    needs: deploy
+    steps:
+      - name: OWASP ZAP Scan
+        uses: zaproxy/action-baseline@v0.11.0
+        with:
+          target: 'https://nandurilxman.github.io/congenial-meme/'
+          cmd_options: '-q'
