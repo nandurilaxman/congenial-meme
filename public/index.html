@@ -12,24 +12,25 @@
   <div id="score" class="score">Loading...</div>
   <p>Last updated: Every 5 minutes via GitHub Actions</p>
   <script>
-    async function fetchScore() {
-      const response = await fetch('score.json');
-      const data = await response.json();
-      if (data.error) {
-        document.getElementById('score').innerHTML = data.error;
-      } else {
-        document.getElementById('score').innerHTML = `
-          <h2>${data.match.teams[0]} vs ${data.match.teams[1]}</h2>
-          <p>${data.match.teams[0]}: ${data.match.score[data.match.teams[0]]}/${data.match.wickets[data.match.teams[0]]}</p>
-          <p>${data.match.teams[1]}: ${data.match.score[data.match.teams[1]]}/${data.match.wickets[data.match.teams[1]]}</p>
-          <p>Overs: ${data.match.overs}</p>
-          ${data.match.matchType ? `<p>Match Type: ${data.match.matchType}</p>` : ''}
-          ${data.match.result ? `<p>Result: ${data.match.result}</p>` : ''}
-        `;
-      }
+  async function fetchScore() {
+    const response = await fetch('score.json');
+    const data = await response.json();
+    console.log('Fetched data:', data); // Debug log
+    if (data.error) {
+      document.getElementById('score').innerHTML = data.error;
+    } else {
+      document.getElementById('score').innerHTML = `
+        <h2>${data.match.teams[0]} vs ${data.match.teams[1]}</h2>
+        <p>${data.match.teams[0]}: ${data.match.score[data.match.teams[0]]}/${data.match.wickets[data.match.teams[0]]}</p>
+        <p>${data.match.teams[1]}: ${data.match.score[data.match.teams[1]]}/${data.match.wickets[data.match.teams[1]]}</p>
+        <p>Overs: ${data.match.overs}</p>
+        ${data.match.matchType ? `<p>Match Type: ${data.match.matchType}</p>` : ''}
+        ${data.match.result ? `<p>Result: ${data.match.result}</p>` : ''}
+      `;
     }
-    fetchScore();
-    setInterval(fetchScore, 20000); // Changed to 20 seconds (20000 milliseconds)
-  </script>
+  }
+  fetchScore();
+  setInterval(fetchScore, 20000);
+</script>
 </body>
 </html>
