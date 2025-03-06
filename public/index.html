@@ -10,9 +10,10 @@
 <body>
   <h1>Live Cricket Scoring App</h1>
   <div id="score" class="score">Loading...</div>
+  <p>Last updated: Every 5 minutes via GitHub Actions</p>
   <script>
     async function fetchScore() {
-      const response = await fetch('https://congenial-meme.herokuapp.com/score'); // Update with your Heroku URL
+      const response = await fetch('score.json'); // Fetch static JSON file
       const data = await response.json();
       if (data.error) {
         document.getElementById('score').innerHTML = data.error;
@@ -26,7 +27,7 @@
       }
     }
     fetchScore();
-    setInterval(fetchScore, 30000); // Update every 30 seconds
+    setInterval(fetchScore, 30000); // Refresh every 30 seconds (shows latest available data)
   </script>
 </body>
 </html>
