@@ -1,3 +1,14 @@
 {
-  "error": "No upcoming matches found"
+  "message": "Upcoming Matches Schedule",
+  "upcomingMatches": [
+    {
+      "teams": [
+        "India",
+        "New Zealand"
+      ],
+      "matchType": "ODI",
+      "dateTime": "2025-03-09T13:00:00Z",
+      "venue": "Dubai International Cricket Stadium, Dubai"
+    }
+  ]
 }
