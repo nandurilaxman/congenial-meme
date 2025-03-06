@@ -1,0 +1,10 @@
+name: Steps and Actions Demo
+on: [push]
+jobs:
+  steps-demo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Custom step
+        run: echo "This is a custom step"
