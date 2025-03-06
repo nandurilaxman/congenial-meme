@@ -15,7 +15,7 @@ async function fetchLiveScore(apiKey) {
       throw new Error("API request failed");
     }
     const liveMatch = response.data.data.find(match => match.status === "live");
-    return liveMatch || null; // Return null if no live matches
+    return liveMatch || null;
   } catch (error) {
     console.error('Error fetching live score:', error.message);
     return null;
@@ -29,26 +29,28 @@ async function fetchLastMatchSummary(apiKey) {
       params: {
         apikey: apiKey,
         offset: 0,
-        limit: 50 // Fetch recent matches
+        limit: 50
       }
     });
     if (response.data.status !== "success") {
       throw new Error("API request failed");
     }
-    // Filter for completed international matches (T20, ODI, Test)
+    // Log the raw response to debug
+    console.log('Raw matches response:', JSON.stringify(response.data.data, null, 2));
+    // Filter for completed matches (broaden criteria)
     const completedMatches = response.data.data.filter(match => 
       match.status === "completed" && 
-      (match.series_type === "International") && 
-      (match.matchType === "t20" || match.matchType === "odi" || match.matchType === "test")
+      (match.matchType === "t20" || match.matchType === "odi" || match.matchType === "test" || 
+       match.matchType === "T20I" || match.matchType === "ODI" || match.matchType === "Test")
     );
     // Sort by date (most recent first) and take the latest
     const lastMatch = completedMatches.sort((a, b) => new Date(b.dateTimeGMT) - new Date(a.dateTimeGMT))[0];
     if (!lastMatch) {
-      return { error: "No recent international matches found" };
+      return { error: "No recent matches found" };
     }
     // Format the match summary
     return {
-      message: "Last International Match Summary",
+      message: "Last Match Summary",
       match: {
         teams: [lastMatch.teamInfo[0].name, lastMatch.teamInfo[1].name],
         score: {
@@ -61,7 +63,7 @@ async function fetchLastMatchSummary(apiKey) {
           [lastMatch.teamInfo[1].name]: lastMatch.score[1]?.wickets || 0
         },
         matchType: lastMatch.matchType.toUpperCase(),
-        result: lastMatch.status // e.g., "Team A won by X runs"
+        result: lastMatch.status
       }
     };
   } catch (error) {
@@ -77,10 +79,8 @@ async function saveLiveScore() {
     console.error("API key not set");
     return;
   }
-  // First, try to fetch live scores
   let scoreData = await fetchLiveScore(apiKey);
   if (scoreData) {
-    // If live match found, format and save it
     scoreData = {
       message: "Live Match Score",
       match: {
@@ -97,17 +97,14 @@ async function saveLiveScore() {
       }
     };
   } else {
-    // If no live matches, fetch the last match summary
     scoreData = await fetchLastMatchSummary(apiKey);
   }
-  // Save to public/score.json
   fs.writeFileSync('public/score.json', JSON.stringify(scoreData, null, 2));
   console.log('Data saved:', scoreData);
 }
 
-// Run the function if called directly
 if (require.main === module) {
   saveLiveScore();
 }
 
-module.exports = { fetchLiveScore, fetchLastMatchSummary }; // Export for testing
+module.exports = { fetchLiveScore, fetchLastMatchSummary };
