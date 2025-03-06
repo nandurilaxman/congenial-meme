@@ -10,6 +10,7 @@ permissions:
   contents: write # Grant write access to the repository
   pages: write # Grant write access to GitHub Pages
   id-token: write # For future-proofing
+  issues: write # Grant permission to create issues (for ZAP integration)
 jobs:
   fetch-and-deploy:
     runs-on: ubuntu-latest
@@ -44,9 +45,9 @@ jobs:
         if: env.SLACK_WEBHOOK_URL != null # Skip if not set
         uses: slackapi/slack-github-action@v1.24.0
         with:
-          slack-message: 'Cricket Scoring App scores updated successfully!' # Use slack-message
+          slack-message: 'Cricket Scoring App scores updated successfully!'
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} # Pass as environment variable
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
       - name: Log Slack Skip
         if: env.SLACK_WEBHOOK_URL == null
         run: echo "Slack notification skipped because SLACK_WEBHOOK_URL is not configured."
@@ -58,9 +59,8 @@ jobs:
       - name: OWASP ZAP Scan
         uses: zaproxy/action-baseline@v0.11.0
         with:
-          target: 'https://nandurilaxman.github.io/congenial-meme/'
-          # Removed -q, keeping default output
+          target: 'https://nandurilaxman.github.io/congenial-meme/' # Updated to the correct URL
           report_json: report_json.json
           report_md: report_md.md
           report_html: report_html.html
-          fail_on_warning: false # Optional: Prevents failure on warnings
+          fail_on_warning: false # Prevents failure on warnings
