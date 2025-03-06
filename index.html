@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Live Cricket Scoring App</title>
+  <style>
+    body { font-family: Arial; text-align: center; }
+    .score { background-color: #e0ffe0; padding: 20px; margin: 20px; }
+  </style>
+</head>
+<body>
+  <h1>Live Cricket Scoring App</h1>
+  <div id="score" class="score">Loading...</div>
+  <p>Last updated: Every 5 minutes via GitHub Actions</p>
+  <script>
+    async function fetchScore() {
+      const response = await fetch('score.json'); // Fetch static JSON file
+      const data = await response.json();
+      if (data.error) {
+        document.getElementById('score').innerHTML = data.error;
+      } else {
+        document.getElementById('score').innerHTML = `
+          <h2>${data.match.teams[0]} vs ${data.match.teams[1]}</h2>
+          <p>${data.match.teams[0]}: ${data.match.score[data.match.teams[0]]}/${data.match.wickets[data.match.teams[0]]}</p>
+          <p>${data.match.teams[1]}: ${data.match.score[data.match.teams[1]]}/${data.match.wickets[data.match.teams[1]]}</p>
+          <p>Overs: ${data.match.overs}</p>
+        `;
+      }
+    }
+    fetchScore();
+    setInterval(fetchScore, 30000); // Refresh every 30 seconds (shows latest available data)
+  </script>
+</body>
+</html>
