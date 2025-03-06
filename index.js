@@ -29,26 +29,23 @@ async function fetchLastMatchSummary(apiKey) {
       params: {
         apikey: apiKey,
         offset: 0,
-        limit: 50
+        limit: 200 // Increase to fetch more matches
       }
     });
     if (response.data.status !== "success") {
       throw new Error("API request failed");
     }
-    // Log the raw response to debug
     console.log('Raw matches response:', JSON.stringify(response.data.data, null, 2));
-    // Filter for completed matches (broaden criteria)
     const completedMatches = response.data.data.filter(match => 
       match.status === "completed" && 
       (match.matchType === "t20" || match.matchType === "odi" || match.matchType === "test" || 
        match.matchType === "T20I" || match.matchType === "ODI" || match.matchType === "Test")
     );
-    // Sort by date (most recent first) and take the latest
+    console.log('Filtered completed matches:', JSON.stringify(completedMatches, null, 2));
     const lastMatch = completedMatches.sort((a, b) => new Date(b.dateTimeGMT) - new Date(a.dateTimeGMT))[0];
     if (!lastMatch) {
-      return { error: "No recent matches found" };
+      return { error: "No recent matches found in the last 200 matches" };
     }
-    // Format the match summary
     return {
       message: "Last Match Summary",
       match: {
