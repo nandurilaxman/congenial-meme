@@ -1,0 +1,9 @@
+name: Conditional Demo
+on: [push]
+jobs:
+  conditional:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Runs only on main"
+        if: github.ref == 'refs/heads/main'
+      - run: echo "Always runs"
