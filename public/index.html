@@ -10,7 +10,7 @@
 <body>
   <h1>Live Cricket Scoring App</h1>
   <div id="score" class="score">Loading...</div>
-  <p>Last updated: Every 1 minute via GitHub Actions</p>
+  <p>Last updated: Every 5 minutes via GitHub Actions</p>
   <script>
     async function fetchScore() {
       const response = await fetch('score.json');
@@ -29,7 +29,7 @@
       }
     }
     fetchScore();
-    setInterval(fetchScore, 30000); // Refresh every 30 seconds
+    setInterval(fetchScore, 20000); // Changed to 20 seconds (20000 milliseconds)
   </script>
 </body>
 </html>
