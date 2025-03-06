@@ -1,13 +1,13 @@
-# devsecops-pipeline.yml - My complete DevSecOps pipeline with live scores
+# devsecops-pipeline.yml - Fetch live scores and deploy statically with GitHub Actions
 name: DevSecOps Pipeline
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
+  schedule:
+    - cron: '*/5 * * * *' # Run every 5 minutes
   workflow_dispatch:
 jobs:
-  build-and-test:
+  fetch-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -21,49 +21,29 @@ jobs:
           node-version: 18
       - run: npm install
       - run: npm test
-      - run: echo "Building Cricket Scoring App"
-      - uses: actions/upload-artifact@v3
-        with:
-          name: build-output
-          path: ./public
-      - name: Set API Key as Environment Variable
-        run: echo "CRICAPI_KEY=${{ secrets.CRICAPI_KEY }}" >> $GITHUB_ENV
-      - name: Run App Locally to Verify (Optional)
-        run: node index.js & sleep 5 # Runs briefly to test API call
+      - run: echo "Fetching live scores"
+      - name: Fetch Live Scores
+        run: node index.js
         env:
           CRICAPI_KEY: ${{ secrets.CRICAPI_KEY }}
-
-  security-scans:
-    runs-on: ubuntu-latest
-    needs: build-and-test
-    steps:
-      - uses: actions/checkout@v4
       - name: TruffleHog Scan
         uses: trufflesecurity/trufflehog@main
         with:
           path: './'
           exclude: 'node_modules'
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: security-scans
-    if: github.ref == 'refs/heads/main'
-    steps:
-      - uses: actions/checkout@v4
-      - run: docker build -t congenial-meme .
-      - run: docker scan congenial-meme
-      - uses: peaceiris/actions-gh-pages@v3
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./public
       - uses: slackapi/slack-github-action@v1.24.0
         with:
           slack-bot-token: ${{ secrets.SLACK_WEBHOOK_URL }}
-          text: 'Cricket Scoring App deployed successfully!'
+          text: 'Cricket Scoring App scores updated successfully!'
 
   post-deploy:
     runs-on: ubuntu-latest
-    needs: deploy
+    needs: fetch-and-deploy
     steps:
       - name: OWASP ZAP Scan
         uses: zaproxy/action-baseline@v0.11.0
