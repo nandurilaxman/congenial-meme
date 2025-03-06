@@ -6,6 +6,10 @@ on:
   schedule:
     - cron: '*/5 * * * *' # Run every 5 minutes
   workflow_dispatch:
+permissions:
+  contents: write # Grant write access to the repository
+  pages: write # Grant write access to GitHub Pages
+  id-token: write # For future-proofing
 jobs:
   fetch-and-deploy:
     runs-on: ubuntu-latest
