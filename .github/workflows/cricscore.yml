@@ -40,10 +40,16 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./public
-      - uses: slackapi/slack-github-action@v1.24.0
+      - name: Notify Slack
+        if: env.SLACK_WEBHOOK_URL != null # Skip if not set
+        uses: slackapi/slack-github-action@v1.24.0
         with:
-          slack-bot-token: ${{ secrets.SLACK_WEBHOOK_URL }}
-          text: 'Cricket Scoring App scores updated successfully!'
+          slack-message: 'Cricket Scoring App scores updated successfully!' # Use slack-message instead of text
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} # Pass as environment variable
+      - name: Log Slack Skip
+        if: env.SLACK_WEBHOOK_URL == null
+        run: echo "Slack notification skipped because SLACK_WEBHOOK_URL is not configured."
 
   post-deploy:
     runs-on: ubuntu-latest
@@ -52,5 +58,5 @@ jobs:
       - name: OWASP ZAP Scan
         uses: zaproxy/action-baseline@v0.11.0
         with:
-          target: 'https://nandurilxman.github.io/congenial-meme/'
+          target: 'https://nandurilaxman.github.io/congenial-meme/'
           cmd_options: '-q'
