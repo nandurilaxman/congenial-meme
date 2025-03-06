@@ -5,6 +5,7 @@
   <style>
     body { font-family: Arial; text-align: center; }
     .score { background-color: #e0ffe0; padding: 20px; margin: 20px; }
+    .match-list { background-color: #f0f0f0; padding: 10px; margin: 5px; }
   </style>
 </head>
 <body>
@@ -12,25 +13,40 @@
   <div id="score" class="score">Loading...</div>
   <p>Last updated: Every 5 minutes via GitHub Actions</p>
   <script>
-  async function fetchScore() {
-    const response = await fetch('score.json');
-    const data = await response.json();
-    console.log('Fetched data:', data); // Debug log
-    if (data.error) {
-      document.getElementById('score').innerHTML = data.error;
-    } else {
-      document.getElementById('score').innerHTML = `
-        <h2>${data.match.teams[0]} vs ${data.match.teams[1]}</h2>
-        <p>${data.match.teams[0]}: ${data.match.score[data.match.teams[0]]}/${data.match.wickets[data.match.teams[0]]}</p>
-        <p>${data.match.teams[1]}: ${data.match.score[data.match.teams[1]]}/${data.match.wickets[data.match.teams[1]]}</p>
-        <p>Overs: ${data.match.overs}</p>
-        ${data.match.matchType ? `<p>Match Type: ${data.match.matchType}</p>` : ''}
-        ${data.match.result ? `<p>Result: ${data.match.result}</p>` : ''}
-      `;
+    async function fetchScore() {
+      const response = await fetch('score.json');
+      const data = await response.json();
+      console.log('Fetched data:', data); // Debug log
+      if (data.error) {
+        document.getElementById('score').innerHTML = data.error;
+      } else if (data.upcomingMatches) {
+        // Display upcoming matches
+        let html = '<h2>Upcoming Matches</h2>';
+        data.upcomingMatches.forEach(match => {
+          html += `
+            <div class="match-list">
+              <p><strong>${match.teams[0]} vs ${match.teams[1]}</strong></p>
+              <p>Match Type: ${match.matchType}</p>
+              <p>Date: ${new Date(match.dateTime).toLocaleString()}</p>
+              <p>Venue: ${match.venue}</p>
+            </div>
+          `;
+        });
+        document.getElementById('score').innerHTML = html;
+      } else {
+        // Display live or last match summary
+        document.getElementById('score').innerHTML = `
+          <h2>${data.match.teams[0]} vs ${data.match.teams[1]}</h2>
+          <p>${data.match.teams[0]}: ${data.match.score[data.match.teams[0]]}/${data.match.wickets[data.match.teams[0]]}</p>
+          <p>${data.match.teams[1]}: ${data.match.score[data.match.teams[1]]}/${data.match.wickets[data.match.teams[1]]}</p>
+          <p>Overs: ${data.match.overs}</p>
+          ${data.match.matchType ? `<p>Match Type: ${data.match.matchType}</p>` : ''}
+          ${data.match.result ? `<p>Result: ${data.match.result}</p>` : ''}
+        `;
+      }
     }
-  }
-  fetchScore();
-  setInterval(fetchScore, 20000);
-</script>
+    fetchScore();
+    setInterval(fetchScore, 20000);
+  </script>
 </body>
 </html>
