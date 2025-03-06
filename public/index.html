@@ -13,7 +13,7 @@
   <p>Last updated: Every 5 minutes via GitHub Actions</p>
   <script>
     async function fetchScore() {
-      const response = await fetch('score.json'); // Fetch static JSON file
+      const response = await fetch('score.json');
       const data = await response.json();
       if (data.error) {
         document.getElementById('score').innerHTML = data.error;
@@ -23,11 +23,13 @@
           <p>${data.match.teams[0]}: ${data.match.score[data.match.teams[0]]}/${data.match.wickets[data.match.teams[0]]}</p>
           <p>${data.match.teams[1]}: ${data.match.score[data.match.teams[1]]}/${data.match.wickets[data.match.teams[1]]}</p>
           <p>Overs: ${data.match.overs}</p>
+          ${data.match.matchType ? `<p>Match Type: ${data.match.matchType}</p>` : ''}
+          ${data.match.result ? `<p>Result: ${data.match.result}</p>` : ''}
         `;
       }
     }
     fetchScore();
-    setInterval(fetchScore, 30000); // Refresh every 30 seconds (shows latest available data)
+    setInterval(fetchScore, 30000); // Refresh every 30 seconds
   </script>
 </body>
 </html>
